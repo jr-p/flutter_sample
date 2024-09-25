@@ -1,6 +1,7 @@
 
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_sample/src/utils/dialog_utils.dart';
 import 'package:provider/provider.dart';
 
 class CommonDrawer extends StatefulWidget {
@@ -11,6 +12,19 @@ class CommonDrawer extends StatefulWidget {
 }
 
 class _CommonDrawerState extends State<CommonDrawer> {
+
+  void logout () async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    DialogUtils.showLoadingDialog(context);
+    
+    await authProvider.logout();
+
+    if (!mounted) return;
+
+    DialogUtils.hideLoadingDialog(context);
+  }
+
   @override
   Widget build(BuildContext context) {
     return SizedBox(
@@ -56,8 +70,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
             ListTile(
               title: const Text('Logout'),
               onTap: () {
-                final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                authProvider.logout();
+                logout();
               },
             ),
           ],

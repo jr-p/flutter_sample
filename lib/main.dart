@@ -4,8 +4,10 @@ import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter_sample/src/screens/auth/login_screen.dart';
 import 'package:flutter_sample/src/screens/auth/register_confirm_screen.dart';
 import 'package:flutter_sample/src/screens/auth/register_input_screen.dart';
+import 'package:flutter_sample/src/screens/home/home_detail_screen.dart';
 import 'package:flutter_sample/src/screens/home/home_screen.dart';
-import 'package:flutter_sample/src/screens/home/setting/setting_screen.dart';
+import 'package:flutter_sample/src/screens/setting/setting_account_edit_screen.dart';
+import 'package:flutter_sample/src/screens/setting/setting_screen.dart';
 import 'package:flutter_sample/src/screens/splash_screen.dart';
 import 'package:provider/provider.dart';
 
@@ -39,7 +41,12 @@ class MyApp extends StatelessWidget {
             return RegisterComfirmScreen(arguments: arguments);
           },
           '/home': (context) => const HomeScreen(),
-          '/setting': (context) => const SettingScreen(),
+          '/home/detail': (context) {
+            final int id = ModalRoute.of(context)!.settings.arguments as int;
+            return HomeDetailScreen(id: id);
+          },
+          '/setting': (context) => SettingScreen(),
+          '/setting/account/edit': (context) => const SettingAccountEditScreen(),
         });
   }
 }
