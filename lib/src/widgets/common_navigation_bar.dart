@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/screens/main_screen.dart';
 
+// 共通のナビゲーションバー
 class CommonNavigationBar extends StatefulWidget {
   const CommonNavigationBar({
     super.key,
@@ -32,7 +33,7 @@ class  _CommonNavigationBarState extends State<CommonNavigationBar> {
       items: _items,
       currentIndex: widget.currentIndex,
       type: BottomNavigationBarType.fixed,
-      selectedItemColor: Colors.blue,
+      selectedItemColor: Colors.pink,
       unselectedItemColor: Colors.grey,
       showSelectedLabels: true,
       showUnselectedLabels: true,

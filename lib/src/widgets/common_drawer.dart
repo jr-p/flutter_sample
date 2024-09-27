@@ -1,9 +1,9 @@
-
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
 import 'package:provider/provider.dart';
 
+// ドロワーの共通部分
 class CommonDrawer extends StatefulWidget {
   const CommonDrawer({ super.key });
 
@@ -35,7 +35,7 @@ class _CommonDrawerState extends State<CommonDrawer> {
             DrawerHeader(
               padding:  const EdgeInsets.symmetric(horizontal: 0, vertical: 5),
               decoration: const BoxDecoration(
-                color: Colors.blue,
+                color: Colors.pink,
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,

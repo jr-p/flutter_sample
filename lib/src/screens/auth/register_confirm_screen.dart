@@ -7,6 +7,7 @@ import 'package:flutter_sample/src/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+// 登録確認画面
 class RegisterComfirmScreen extends StatefulWidget {
   final Map<String, String> arguments;
 
@@ -23,6 +24,7 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
   final _forKey = GlobalKey<FormState>();
   TextEditingController nameController = TextEditingController();
   TextEditingController emailController = TextEditingController();
+  TextEditingController phoneNumberController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
   
   @override
@@ -31,6 +33,7 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
     // 各 Controller に初期値を設定
     nameController = TextEditingController(text: widget.arguments['name']);
     emailController = TextEditingController(text: widget.arguments['email']);
+    phoneNumberController = TextEditingController(text: widget.arguments['phone_number']);
     passwordController = TextEditingController(text: widget.arguments['password']);
   }
 
@@ -38,6 +41,7 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
   void dispose() {
     nameController.dispose();
     emailController.dispose();
+    phoneNumberController.dispose();
     super.dispose();
   }
   
@@ -53,13 +57,14 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
       final name = nameController.text;
       final email = emailController.text;
+      final phoneNumber = phoneNumberController.text;
       final password = passwordController.text;
 
       // ローディングダイアログを表示
       DialogUtils.showLoadingDialog(context);
 
       // 登録メソッドを呼び出す
-      await authProvider.register(name, email, password);
+      await authProvider.register(name, email, phoneNumber, password);
 
       if (!context.mounted) return;
 
@@ -97,6 +102,8 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
                   _buildConfirmationRow('Name', nameController.text),
                   const SizedBox(height: 15),
                   _buildConfirmationRow('Email', emailController.text),
+                  const SizedBox(height: 15),
+                  _buildConfirmationRow('Phone Number', phoneNumberController.text),
                   const SizedBox(height: 15),
                   _buildConfirmationRow('Password', _maskPassword(passwordController.text)),
                   const SizedBox(height: 50),

@@ -1,64 +1,132 @@
+import 'dart:convert';
 import 'package:flutter_sample/src/constants/app_const.dart';
+import 'package:flutter_sample/src/utils/service_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+// 認証関連のサービス
 class AuthService {
-  // モック用の定数データ
-  final String mockEmail = AppConst.mockEmail;
-  final String mockPassword = AppConst.mockPassword;
-  final String mockToken = AppConst.mockToken;
+  final String baseApiUrl = AppConst.baseApiUrl;
 
-  // 登録リクエスト (モック版)
-  Future<String?> register(String name, String email, String password) async {
-    // 2秒の遅延をシミュレート
-    await Future.delayed(const Duration(seconds: 2));
+  // ユーザー重複チェックリクエスト
+  Future<bool> checkUser(String email) async {
+    final requestData = jsonEncode({
+      'email': email,
+    });
 
-    // メールアドレスが既に存在しているかチェック（モックデータ）
-    if (email == mockEmail) {
-      throw Exception('このメールアドレスは既に使用されています');
-    }
-
-    // 登録成功を模倣
-    return mockToken;
+    final response = await ServiceUtils.postRequest('check-user', null, requestData);
+    
+    return response.statusCode == 200;
   }
 
-  // ログインリクエスト (モック版)
-  Future<String?> login(String email, String password) async {
-    // 2秒の遅延をシミュレート
-    await Future.delayed(const Duration(seconds: 2));
+  // 登録リクエスト
+  Future<String?> register(String name, String email, String phoneNumber, String password) async {
+    final requestData = jsonEncode({
+      'name': name,
+      'email': email,
+      'phone_number': phoneNumber,
+      'password': password,
+    });
+    
+    final response = await ServiceUtils.postRequest('register', null, requestData);
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final token = data['token'];
 
-    // モックされたログイン認証
-    if (email == mockEmail && password == mockPassword) {
       // トークンを保存
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('auth_token', mockToken);
-
-      // トークンを返す
-      return mockToken;
+      await ServiceUtils.setToken(token);
+      return token;
+    } else if (response.statusCode == 409) {
+      throw Exception('ユーザーが既に存在します');
     } else {
+      throw Exception('登録に失敗しました');
+    }
+
+  }
+
+  // ログインリクエスト
+  Future<String?> login(String email, String password) async {
+    final requestData = jsonEncode({
+      'email': email,
+      'password': password,
+    });
+
+    final response = await ServiceUtils.postRequest('login', null, requestData);
+    
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      final token = data['token'];
+
+      // トークンを保存
+      await ServiceUtils.setToken(token);
+
+      return token;
+    } else if (response.statusCode == 401) {
       throw Exception('ユーザー情報が正しくありません');
+    } else {
+      throw Exception('ログインに失敗しました');
     }
   }
 
-  // ログアウトリクエスト (モック版)
-  Future<void> logout() async {
-    // 2秒の遅延をシミュレート
-    await Future.delayed(const Duration(seconds: 2));
-
-    final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('auth_token');
+  // 二要素認証リクエスト
+  Future<String> twoFactorAuth(String passcode) async {
+    final token = await ServiceUtils.getToken();
     
     if (token != null) {
-      // トークンを削除
-      await prefs.remove('auth_token');
+      final requestData = jsonEncode({
+        'code': passcode,
+      });
+
+      final response = await ServiceUtils.postRequest('two-factor-auth', token, requestData);
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
+
+        // トークンを保存
+        await ServiceUtils.setToken(token);
+        return token;
+      } else if (response.statusCode == 401) {
+        throw Exception('認証コードが正しくありません');
+      } else {
+        throw Exception('認証に失敗しました');
+      }
+    } else {
+      throw Exception('ログインしていません');
     }
-    return;
   }
 
-  // 認証状態のチェック (モック版)
-  Future<bool> isAuthenticated() async {
-    // 1秒の遅延をシミュレート
-    await Future.delayed(const Duration(seconds: 1));
+  // 二要素認証再送リクエスト
+  Future<bool> resendTwoFactorAuth() async {
+    final token = await ServiceUtils.getToken();
+    if (token != null) {
+      await ServiceUtils.postRequest('resend-two-factor-code', token, null);
+    }
+    return true;
+  }
 
+  // ログアウトリクエスト
+  Future<void> logout() async {
+    final token = await ServiceUtils.getToken(); 
+    
+    if (token != null) {
+      await ServiceUtils.postRequest('logout', token, null);
+      // トークンを削除
+      await ServiceUtils.removeToken();
+    }
+  }
+
+  // パスワードリセットリクエスト
+  Future<void> resetPassword(String email) async {
+    final requestData = jsonEncode({
+      'email': email,
+    });
+
+    await ServiceUtils.postRequest('reset-password', null, requestData);
+  }
+
+  // 認証状態のチェック
+  Future<bool> isAuthenticated() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('auth_token');
   }

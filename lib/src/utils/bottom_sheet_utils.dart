@@ -1,7 +1,7 @@
-
 import 'package:flutter/material.dart';
 
 class BottomSheetUtils {
+  // ボトムシートを表示する
   static void showBottomSheet(BuildContext context, Widget child) {
     showModalBottomSheet(
       context: context,

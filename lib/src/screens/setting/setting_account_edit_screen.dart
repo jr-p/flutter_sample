@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sample/src/constants/app_const.dart';
+import 'package:flutter_sample/src/services/setting_service.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
 import 'package:flutter_sample/src/utils/validation_utils.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
@@ -16,16 +16,28 @@ class SettingAccountEditScreen extends StatefulWidget {
 }
 
 class _SettingAccountEditScreenState extends State<SettingAccountEditScreen> {
+  final SettingService settingService = SettingService();
   final _formKey = GlobalKey<FormState>();
-  TextEditingController emailController = TextEditingController(text: AppConst.mockEmail);
-  TextEditingController passwordController = TextEditingController(text: AppConst.mockPassword);
+  TextEditingController emailController = TextEditingController();
+  TextEditingController passwordController = TextEditingController();
   TextEditingController confirmPasswordController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    getUser();
+  }
+
+  void getUser () async {
+    final user = await settingService.getUser();
+    emailController.text = user['email'];
+  }
 
   void updateAccountInfo() async {
     // ローディングダイアログを表示
     DialogUtils.showLoadingDialog(context);
 
-    await Future.delayed(const Duration(seconds: 2));
+    await settingService.updateUser(emailController.text, passwordController.text);
 
     if (!mounted) return;
 

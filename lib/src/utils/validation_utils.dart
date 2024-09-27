@@ -22,6 +22,19 @@ class ValidationUtils {
     return null;
   }
 
+  // 電話番号のバリデーション
+  static String? validatePhoneNumber(String? value) {
+    if (value == null || value.isEmpty) {
+      return 'Phone Numberを入力してください';
+    }
+    String phonePattern = r'^[0-9]+$';
+    RegExp regExp = RegExp(phonePattern);
+    if (!regExp.hasMatch(value)) {
+      return 'Phone Numberは数字のみで入力してください';
+    }
+    return null;
+  }
+
   // パスワードのバリデーション
   static String? validatePassword(String? value) {
     if (value == null || value.isEmpty) {

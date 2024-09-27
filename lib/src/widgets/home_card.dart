@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
+// ホーム画面のカードウィジェット
 class HomeCard extends StatelessWidget {
   const HomeCard({
     super.key,
@@ -29,13 +30,13 @@ class HomeCard extends StatelessWidget {
   // 煌めきアニメーションを表示するためのウィジェット
   Widget _buildShimmerEffect() {
     return Shimmer.fromColors(
-      baseColor: Colors.grey[300]!, // 煌めきの色
+      baseColor: Colors.grey.withOpacity(0.2), // 煌めきの色
       highlightColor: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(8.0),
       child: Container(
         width: width, // お好みのサイズ
-        height: 100, // お好みのサイズ
+        height: height, // お好みのサイズ
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(8.0),

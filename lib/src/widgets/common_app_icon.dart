@@ -1,9 +1,7 @@
-
-
 import 'package:flutter/material.dart';
 
+// 共通のアプリアイコン
 class CommonAppIcon extends StatelessWidget {
-
   const CommonAppIcon({
     super.key,
     required this.size,
@@ -16,7 +14,7 @@ class CommonAppIcon extends StatelessWidget {
     return Icon(
       Icons.flutter_dash,
       size: size,
-      color: Colors.blue,
+      color: Colors.pink,
     );
   }
 }

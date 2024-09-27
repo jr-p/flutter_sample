@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 共通のパスワード入力
 class CommonPasswordInput extends StatefulWidget {
   final String label;
   final TextEditingController controller;

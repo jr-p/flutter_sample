@@ -1,5 +1,6 @@
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
+// アプリ全体で使用する定数を定義
 class AppConst {
   static final String appName = dotenv.env['APP_NAME'] ?? 'Flutter App';
   static final String baseUrl = dotenv.env['BASE_URL'] ?? 'http://localhost:3000';

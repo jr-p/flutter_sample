@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:flutter_sample/src/services/home_service.dart';
 
 class HomeDetailScreen extends StatefulWidget {
   const HomeDetailScreen({
@@ -13,6 +15,7 @@ class HomeDetailScreen extends StatefulWidget {
 }
 
 class _HomeDetailScreenState extends State<HomeDetailScreen> {
+  HomeService homeService = HomeService();
   bool _isLoading = false;
   Map<String, dynamic> _data = {};
 
@@ -27,16 +30,7 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
       _isLoading = true;
     });
 
-    // APIリクエストのシミュレーション（1秒待機）
-    await Future.delayed(const Duration(seconds: 1));
-
-    // データを取得
-    _data = {
-      'id': widget.id,
-      'title': 'Home Detail ${widget.id}',
-      'description': 'This is detail of Home Card ${widget.id}',
-      'image': 'https://placehold.jp/ff006f/ffffff/150x150.png',
-    };
+    _data = await homeService.getItemDetail(widget.id);
 
     setState(() {
       _isLoading = false;
@@ -49,23 +43,22 @@ class _HomeDetailScreenState extends State<HomeDetailScreen> {
     return Scaffold(
       body: Center(
         child: _isLoading
-            ? const CircularProgressIndicator()
-            : Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.network(_data['image']),
-                  const SizedBox(height: 20),
-                  Text(
-                    _data['title'],
-                    style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    _data['description'],
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                ],
+          ? const CircularProgressIndicator()
+          : Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Image.network(_data['image']),
+              const SizedBox(height: 20),
+              Text(
+                _data['title'],
+                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
+              const SizedBox(height: 10),
+              Html(
+                data: _data['description'], 
+              ),
+            ],
+          ),
       ),
     );
   }

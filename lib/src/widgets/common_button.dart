@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 共通のボタン
 class CommonButton extends StatelessWidget {
   const CommonButton({
     super.key,

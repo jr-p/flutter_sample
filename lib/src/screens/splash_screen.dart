@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 
+// スプラッシュ画面
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 

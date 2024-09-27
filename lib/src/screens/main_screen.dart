@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_drawer.dart';
 
+
+// 認証後のメイン画面
 class MainScreen extends StatefulWidget {
   final int  initialIndex;
   
@@ -55,7 +57,7 @@ class _MainScreenState extends State<MainScreen> {
         items: _items,
         currentIndex: currentIndex,
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.blue,
+        selectedItemColor: Colors.pink,
         unselectedItemColor: Colors.grey,
         showSelectedLabels: true,
         showUnselectedLabels: true,

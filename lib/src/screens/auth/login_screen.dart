@@ -8,6 +8,7 @@ import 'package:flutter_sample/src/widgets/common_button.dart';
 import 'package:flutter_sample/src/widgets/common_input.dart';
 import 'package:provider/provider.dart';
 
+// ログイン画面
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
 
@@ -57,51 +58,64 @@ class LoginScreen extends StatelessWidget {
               }
             });
             return Container(
-                padding: const EdgeInsets.all(10),
-                child: Column(
-                  children: [
-                    const CommonAppIcon(size: 100),
-                    const SizedBox(height: 30),
-                    Form(
-                      key: _formKey,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          CommonInput(
-                              label: 'Email',
-                              controller: emailController,
-                              obscureText: false,
-                              validator: (value) =>
-                                  ValidationUtils.validateEmail(value)),
-                          const SizedBox(height: 30),
-                          CommonInput(
-                              label: 'Password',
-                              controller: passwordController,
-                              obscureText: true,
-                              validator: (value) =>
-                                  ValidationUtils.validatePassword(value)),
-                          const SizedBox(height: 50),
-                          CommonButton(
-                            text: 'Login',
-                            onPressed: login,
+              padding: const EdgeInsets.all(10),
+              child: Column(
+                children: [
+                  const CommonAppIcon(size: 100),
+                  const SizedBox(height: 30),
+                  Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        CommonInput(
+                            label: 'Email',
+                            controller: emailController,
+                            obscureText: false,
+                            validator: (value) =>
+                                ValidationUtils.validateEmail(value)),
+                        const SizedBox(height: 30),
+                        CommonInput(
+                            label: 'Password',
+                            controller: passwordController,
+                            obscureText: true,
+                            validator: (value) =>
+                                ValidationUtils.validatePassword(value)),
+                        const SizedBox(height: 50),
+                        CommonButton(
+                          text: 'Login',
+                          onPressed: login,
+                        ),
+                        const SizedBox(height: 80),
+                        GestureDetector(
+                          onTap: () {
+                            Future.delayed(const Duration(milliseconds: 100));
+                            Navigator.pushNamed(context, '/password/reset');
+                          },
+                          child: const Text(
+                            'パスワードを忘れた方はこちら',
+                            style: TextStyle(
+                                decoration: TextDecoration.underline),
                           ),
-                          const SizedBox(height: 80),
-                          GestureDetector(
-                            onTap: () {
-                              Future.delayed(const Duration(milliseconds: 100));
-                              Navigator.pushNamed(context, '/register-input');
-                            },
-                            child: const Text(
-                              '会員登録がまだの方はこちら',
-                              style: TextStyle(
-                                  decoration: TextDecoration.underline),
-                            ),
+                        ),
+                        const SizedBox(height: 30),
+                        GestureDetector(
+                          onTap: () {
+                            Future.delayed(const Duration(milliseconds: 100));
+                            Navigator.pushNamed(context, '/register/input');
+                          },
+                          child: const Text(
+                            '会員登録がまだの方はこちら',
+                            style: TextStyle(
+                                decoration: TextDecoration.underline),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
-                  ],
-                ));
+                  ),
+                ],
+              )
+            );
           },
         ),
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+// 共通の入力フォーム
 class CommonInput extends StatelessWidget{
   const CommonInput({
     super.key,
