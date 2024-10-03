@@ -99,7 +99,15 @@ class AuthProvider with ChangeNotifier {
   Future<void> checkAuthentication() async {
     _isAuthenticated = await _authService.isAuthenticated();
     if (isAuthenticated) {
-      _isTwoAuthenticated = await _authService.isTwoAuthenticated();
+      try {
+        _isTwoAuthenticated = await _authService.isTwoAuthenticated();
+      } on ApiException catch (_) {
+        _isAuthenticated = false;
+        _isTwoAuthenticated = false;
+      } catch (e) {
+        _isAuthenticated = false;
+        _isTwoAuthenticated = false;
+      }
     }
     notifyListeners();
   }

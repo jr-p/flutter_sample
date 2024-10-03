@@ -146,6 +146,8 @@ class AuthService {
       if (response.statusCode == 200) {
         final isTwoAuthenticated = jsonDecode(response.body)['is_two_authenticated'];
         return isTwoAuthenticated;
+      } else {
+        throw ApiException('二要素認証のチェックに失敗しました');
       }
     }
     return false;
