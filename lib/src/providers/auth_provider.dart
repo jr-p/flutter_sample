@@ -74,7 +74,7 @@ class AuthProvider with ChangeNotifier {
       _message = null;
       await _authService.logout();
       _isAuthenticated = false;
-      _isTwoAuthenticated = true;
+      _isTwoAuthenticated = false;
     } on ApiException catch (e) {
       _message = e.message;
     } catch (e) {
@@ -121,6 +121,6 @@ class AuthProvider with ChangeNotifier {
   // 退会成功
   Future<void> successWithidraw() async {
     _isAuthenticated = false;
-    _isTwoAuthenticated = true;
+    _isTwoAuthenticated = false;
   }
 }
