@@ -98,7 +98,7 @@ class AuthProvider with ChangeNotifier {
   // トークンのチェック
   Future<void> checkAuthentication() async {
     _isAuthenticated = await _authService.isAuthenticated();
-    if (isAuthenticated) {
+    if (_isAuthenticated) {
       try {
         _isTwoAuthenticated = await _authService.isTwoAuthenticated();
       } on ApiException catch (_) {
