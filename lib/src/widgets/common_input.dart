@@ -22,12 +22,13 @@ class CommonInput extends StatelessWidget{
 
   @override
   Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
           label,
-          style: const TextStyle(
+          style: textTheme.bodyMedium!.copyWith(
             fontSize: 15,
             fontWeight: FontWeight.bold,
           ),
@@ -35,8 +36,12 @@ class CommonInput extends StatelessWidget{
         TextFormField(
           controller: controller,
           obscureText: obscureText,
+          cursorColor: Colors.pink,
           decoration: InputDecoration(
             hintText: hintText,
+            focusedBorder: UnderlineInputBorder(
+              borderSide: BorderSide(color: Colors.pink, width: 2),
+            ),
           ),
           onChanged: onChanged,
           validator: validator,

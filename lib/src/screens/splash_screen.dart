@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:flutter_sample/src/widgets/auth_wrapper.dart';
+import 'package:flutter_sample/src/utils/route_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_sample/src/providers/auth_provider.dart';
@@ -50,8 +50,6 @@ class _SplashScreenState extends State<SplashScreen>
 
   // 認証状態をチェックして画面遷移
   Future<void> _checkAuthAndNavigate() async {
-    await Future.delayed(const Duration(seconds: 2));
-
     // mountedチェックしてからcontextを使ってProviderを呼び出す
     if (!mounted) return;
 
@@ -60,10 +58,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     // 再度mountedチェックしてから画面遷移
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const AuthWrapper()),
-      );
+      RouteUtils.navigateToAuthWrapper(context);
     }
   }
 

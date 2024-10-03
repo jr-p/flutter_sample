@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/providers/auth_provider.dart';
+import 'package:flutter_sample/src/services/api_exception.dart';
 import 'package:flutter_sample/src/services/setting_service.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
+import 'package:flutter_sample/src/utils/route_utils.dart';
+import 'package:flutter_sample/src/utils/snackbar_utils.dart';
 import 'package:flutter_sample/src/utils/validation_utils.dart';
-import 'package:flutter_sample/src/widgets/auth_wrapper.dart';
+import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_button.dart';
 import 'package:flutter_sample/src/widgets/common_input.dart';
 import 'package:provider/provider.dart';
@@ -18,63 +21,41 @@ class SettingPhoneNumberEditScreen extends StatefulWidget {
 class _SettingPhoneNumberEditScreenState extends State<SettingPhoneNumberEditScreen> {
   final _formKey = GlobalKey<FormState>();
   final SettingService settingService = SettingService();
-  TextEditingController phoneNumberController = TextEditingController();
+  TextEditingController _phoneNumberController = TextEditingController();
   AuthProvider? authProvider;
   
   @override
   void initState() {
     super.initState();
-    authProvider = Provider.of<AuthProvider>(context, listen: false);
+    _phoneNumberController = TextEditingController();
   }
 
   @override
   void dispose() {
-    phoneNumberController.dispose();
+    _phoneNumberController.dispose();
     super.dispose();
   }
 
   Future<void> updatePhoneNumber() async {
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) return;
+
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
     DialogUtils.showLoadingDialog(context);
 
-    // 電話番号変更処理
-    final result = await settingService.updatePhoneNumber(phoneNumberController.text);
-    
-    if (!mounted) return;
-
-    if (result) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('電話番号を変更しました',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold
-            )
-          ),
-        )
-      );
-      await authProvider?.successPhoneNumber();
-
+    try {
+      await settingService.updatePhoneNumber(_phoneNumberController.text);
+      await authProvider.successPhoneNumber();
       if (!mounted) return;
-
+      SnackbarUtils.showSnackbar(context, '電話番号を変更しました');
       DialogUtils.hideLoadingDialog(context);
+      RouteUtils.navigateToAuthWrapper(context);
 
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute(builder: (context) => const AuthWrapper()),
-        (route) => false, // 以前の画面を削除する
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('電話番号の変更に失敗しました',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 16,
-              fontWeight: FontWeight.bold
-            )
-          ),
-        )
-      );
+    } on ApiException catch (e) {
+      DialogUtils.hideLoadingDialog(context);
+      SnackbarUtils.showSnackbar(context, e.message);
+    } catch (e) {
+      SnackbarUtils.showSnackbar(context, '電話番号の変更に失敗しました');
       DialogUtils.hideLoadingDialog(context);
     }
   }
@@ -82,9 +63,7 @@ class _SettingPhoneNumberEditScreenState extends State<SettingPhoneNumberEditScr
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('電話番号変更'),
-      ),
+      appBar: const CommonAppBar(title: '電話番号変更'), 
       body: Padding(
         padding: const EdgeInsets.all(10),
         child: Column(
@@ -97,7 +76,7 @@ class _SettingPhoneNumberEditScreenState extends State<SettingPhoneNumberEditScr
               child: Column(
                 children: [
                   CommonInput(
-                    controller: phoneNumberController,
+                    controller: _phoneNumberController,
                     label: 'Phone Number',
                     obscureText: false,
                     validator: (value) => ValidationUtils.validatePhoneNumber(value),
@@ -105,15 +84,7 @@ class _SettingPhoneNumberEditScreenState extends State<SettingPhoneNumberEditScr
                   const SizedBox(height: 20),
                   CommonButton(
                     text: '電話番号を変更',
-                    onPressed: () {
-                      final isValid = _formKey.currentState!.validate();
-                      if (!isValid) {
-                        return;
-                      } else {
-                        // 電話番号変更処理
-                        updatePhoneNumber();
-                      }
-                    },
+                    onPressed: updatePhoneNumber,
                   ),
                 ],
               )

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
+import 'package:flutter_sample/src/utils/route_utils.dart';
+import 'package:flutter_sample/src/utils/snackbar_utils.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_button.dart';
 import 'package:provider/provider.dart';
@@ -62,68 +64,76 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
     }
   }
 
+  void twoFactorAuth() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    
+    DialogUtils.showLoadingDialog(context);
+
+    await authProvider.twoFactorAuth(passcode);
+
+    if (!mounted) return;
+
+    DialogUtils.hideLoadingDialog(context);
+
+    if (authProvider.message != null) {
+      SnackbarUtils.showSnackbar(context, authProvider.message!);
+    } else {
+      RouteUtils.navigateToAuthWrapper(context);
+    }
+  }
+
+  void resendTwoFactorAuth() async {
+    final authProvider = Provider.of<AuthProvider>(context, listen: false);
+    clearAll();
+    DialogUtils.showLoadingDialog(context);
+    
+    await authProvider.resendTwoFactorAuth();
+
+    if (!mounted) return;
+    
+    DialogUtils.hideLoadingDialog(context);
+
+    if (authProvider.message != null) {
+      SnackbarUtils.showSnackbar(context, authProvider.message!);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CommonAppBar(title: '二段階認証'), // 共通のAppBar
       body: Padding(
         padding: const EdgeInsets.all(10), // 全体にパディングを設定
-        child: Consumer<AuthProvider>(
-          builder: (context, authProvider, child) {
-            // Snackbarやローディングダイアログの制御
-            WidgetsBinding.instance.addPostFrameCallback((_) {
-              if (authProvider.message != null) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(authProvider.message!, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-                  ),
-                );
-              }
-              if (authProvider.isLoading) {
-                DialogUtils.showLoadingDialog(context); // ローディングダイアログ表示
-              } else {
-                DialogUtils.hideLoadingDialog(context); // ローディングダイアログ非表示
-              }
-            });
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに配置
+        child:  Column(
+          crossAxisAlignment: CrossAxisAlignment.start, // 左寄せに配置
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 均等に配置
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly, // 均等に配置
-                  children: [
-                    const SizedBox(width: 2), // 微調整用のスペース
-                    // 認証コード用のTextFieldを生成
-                    ...List.generate(pinCount, _buildTextField),
-                    const SizedBox(width: 2), // 微調整用のスペース
-                  ],
-                ),
-                const SizedBox(height: 40), // 下にスペースを追加
-                GestureDetector(
-                  onTap: () {
-                    clearAll(); // フィールドをクリア
-                    final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                    authProvider.resendTwoFactorAuth(); // 認証コードを再送
-                  },
-                  child: const Text(
-                    '認証コードを再送する',
-                    style: TextStyle(decoration: TextDecoration.underline), // 下線付きのテキスト
-                  ),
-                ),
-                const SizedBox(height: 44), // さらにスペースを追加
-                Center(
-                  child: CommonButton(
-                    text: '二段階認証をする', // ボタンテキスト
-                    onPressed: () {
-                      final authProvider = Provider.of<AuthProvider>(context, listen: false);
-                      authProvider.twoFactorAuth(passcode); // 認証コードを送信
-                    },
-                  ),
-                )
+                const SizedBox(width: 2), // 微調整用のスペース
+                // 認証コード用のTextFieldを生成
+                ...List.generate(pinCount, _buildTextField),
+                const SizedBox(width: 2), // 微調整用のスペース
               ],
-            );
-          }
-        )
-      ),
+            ),
+            const SizedBox(height: 40), // 下にスペースを追加
+            GestureDetector(
+              onTap: resendTwoFactorAuth, // タップ時の処理
+              child: const Text(
+                '認証コードを再送する',
+                style: TextStyle(decoration: TextDecoration.underline), // 下線付きのテキスト
+              ),
+            ),
+            const SizedBox(height: 44), // さらにスペースを追加
+            Center(
+              child: CommonButton(
+                text: '二段階認証をする', // ボタンテキスト
+                onPressed: twoFactorAuth,
+              ),
+            )
+          ],
+        ),
+      ), 
     );
   }
 

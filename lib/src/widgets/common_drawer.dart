@@ -1,6 +1,8 @@
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
+import 'package:flutter_sample/src/utils/route_utils.dart';
+import 'package:flutter_sample/src/utils/snackbar_utils.dart';
 import 'package:provider/provider.dart';
 
 // ドロワーの共通部分
@@ -23,6 +25,11 @@ class _CommonDrawerState extends State<CommonDrawer> {
     if (!mounted) return;
 
     DialogUtils.hideLoadingDialog(context);
+    if (authProvider.message != null) {
+      SnackbarUtils.showSnackbar(context, authProvider.message!);
+    } else {
+      RouteUtils.navigateToAuthWrapper(context);
+    }
   }
 
   @override
@@ -42,12 +49,13 @@ class _CommonDrawerState extends State<CommonDrawer> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                     child: Text(
                       'Common Drawer',
                       style: TextStyle(
                         color: Colors.white,
                         fontSize: 20,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),

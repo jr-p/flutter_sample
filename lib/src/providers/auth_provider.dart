@@ -1,3 +1,4 @@
+import 'package:flutter_sample/src/services/api_exception.dart';
 import 'package:flutter_sample/src/services/auth_service.dart';
 import 'package:flutter/material.dart';
 
@@ -5,126 +6,93 @@ import 'package:flutter/material.dart';
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService(); // AuthServiceのインスタンスを作成
   bool _isAuthenticated = false;
-  bool _isTwoAuthenticated = false;
-  bool _isLoading = false;
+  bool _isTwoAuthenticated = true;
   String? _message;
 
   bool get isAuthenticated => _isAuthenticated;
   bool get isTwoAuthenticated => _isTwoAuthenticated;
-  bool get isLoading => _isLoading;
   String? get message => _message;
 
   // 登録処理
-  Future<void> register(
-      String name, String email, String phoneNumber, String password) async {
+  Future<void> register(String name, String email, String phoneNumber, String password) async {
     try {
-      _isLoading = true;
       _message = null;
-      notifyListeners();
-
-      final token = await _authService.register(name, email, phoneNumber, password);
-      if (token != null) {
-        _isAuthenticated = true;
-        _message = null;
-        _isLoading = false;
-        notifyListeners();
-      }
+      await _authService.register(name, email, phoneNumber, password);
+      _isAuthenticated = true;
+      _isTwoAuthenticated = false;
+    } on ApiException catch (e) {
+      _message = e.message;
     } catch (e) {
-      // エラーハンドリング
-      _message = e.toString().replaceAll('Exception:', '');
-      _isLoading = false;
-      notifyListeners();
+      _message = '登録に失敗しました';
     }
   }
 
   // ログイン処理
   Future<void> login(String email, String password) async {
-    try {
-      _isLoading = true;
+    try { 
       _message = null;
-      notifyListeners();
-      
-      final token = await _authService.login(email, password);
-
-      if (token != null) {
-        _isAuthenticated = true;
-        _isTwoAuthenticated = false;
-        _isLoading = false;
-        _message = null;
-        notifyListeners();
-      }
+      await _authService.login(email, password);
+      _isAuthenticated = true;
+      _isTwoAuthenticated = false;
+    } on ApiException catch (e) {
+      _message = e.message; 
     } catch (e) {
-      // エラーハンドリング
-      _message = e.toString().replaceAll('Exception:', '');
-      _isLoading = false;
-      notifyListeners();
+      _message = 'ログインに失敗しました';
     }
   }
 
   // 二段階認証処理
   Future<void> twoFactorAuth(String passcode) async {
     try {
-      _isLoading = true;
       _message = null;
-      notifyListeners();
-
       await _authService.twoFactorAuth(passcode);
       _isTwoAuthenticated = true;
-      _isLoading = false;
-      _message = null;
-      notifyListeners();
-      
+    } on ApiException catch (e) {
+      _message = e.message;
     } catch (e) {
-      // エラーハンドリング
-      _message = e.toString().replaceAll('Exception:', '');
-      _isLoading = false;
-      notifyListeners();
+      _message = '認証に失敗しました'; 
     }
   }
 
   // 二段階認証再送処理
   Future<void> resendTwoFactorAuth() async {
     try {
-      _isLoading = true;
       _message = null;
-      notifyListeners();
-
-      final result = await _authService.resendTwoFactorAuth();
-      if (result) {
-        _isLoading = false;
-        _message = '再送しました';
-        notifyListeners();
-        _message = null;
-      }
+      await _authService.resendTwoFactorAuth();
+      _message = '認証再送しました';
+    } on ApiException catch (e) {
+      _message = e.message;
     } catch (e) {
-      // エラーハンドリング
-      _message = e.toString().replaceAll('Exception:', '');
-      _isLoading = false;
-      notifyListeners();
+      _message = '認証再送に失敗しました';
     }
   }
 
 
   // ログアウト処理
   Future<void> logout() async {
-    _isLoading = true;
-    notifyListeners();
-    await _authService.logout();
-    _isAuthenticated = false;
-    _isTwoAuthenticated = false;
-    _isLoading = false;
-    _message = null;
-    notifyListeners();
+    try {
+      _message = null;
+      await _authService.logout();
+      _isAuthenticated = false;
+      _isTwoAuthenticated = true;
+    } on ApiException catch (e) {
+      _message = e.message;
+    } catch (e) {
+      _message = 'ログアウトに失敗しました';
+    }
   }
 
   // パスワードリセット処理
   Future<void> resetPassword(String email) async {
-    _isLoading = true;
-    notifyListeners();
-    await _authService.resetPassword(email);
-    _isLoading = false;
-    _message = 'パスワードリセットメールを送信しました';
-    notifyListeners();
+    try {
+      _message = null;
+      await _authService.resetPassword(email);
+      _message = 'パスワードリセットメールを送信しました';
+    } on ApiException catch (e) {
+      _message = e.message;
+    } catch (e) {
+      _message = 'パスワードリセットに失敗しました';
+    }
   }
 
   // トークンのチェック
@@ -137,13 +105,11 @@ class AuthProvider with ChangeNotifier {
   Future<void> successPhoneNumber() async {
     _isAuthenticated = true;
     _isTwoAuthenticated = false;
-    notifyListeners();
   }
 
   // 退会成功
   Future<void> successWithidraw() async {
     _isAuthenticated = false;
-    _isTwoAuthenticated = false;
-    notifyListeners();
+    _isTwoAuthenticated = true;
   }
 }

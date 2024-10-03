@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:flutter_sample/src/constants/app_const.dart';
+import 'package:flutter_sample/src/services/api_exception.dart';
 import 'package:flutter_sample/src/utils/service_utils.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,18 +9,21 @@ class AuthService {
   final String baseApiUrl = AppConst.baseApiUrl;
 
   // ユーザー重複チェックリクエスト
-  Future<bool> checkUser(String email) async {
+  Future<void> checkUser(String email) async {
     final requestData = jsonEncode({
       'email': email,
     });
 
     final response = await ServiceUtils.postRequest('check-user', null, requestData);
     
-    return response.statusCode == 200;
+    if (response.statusCode != 200) {
+      final message = jsonDecode(response.body)['message'] ?? 'ユーザーが存在します';
+      throw ApiException(message);
+    }
   }
 
   // 登録リクエスト
-  Future<String?> register(String name, String email, String phoneNumber, String password) async {
+  Future<void> register(String name, String email, String phoneNumber, String password) async {
     final requestData = jsonEncode({
       'name': name,
       'email': email,
@@ -35,41 +39,34 @@ class AuthService {
 
       // トークンを保存
       await ServiceUtils.setToken(token);
-      return token;
-    } else if (response.statusCode == 409) {
-      throw Exception('ユーザーが既に存在します');
     } else {
-      throw Exception('登録に失敗しました');
-    }
+      final message = jsonDecode(response.body)['message'] ?? '登録に失敗しました';
+      throw ApiException(message);
+    } 
 
   }
 
   // ログインリクエスト
-  Future<String?> login(String email, String password) async {
+  Future<void> login(String email, String password) async {
     final requestData = jsonEncode({
       'email': email,
       'password': password,
     });
 
     final response = await ServiceUtils.postRequest('login', null, requestData);
-    
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
       final token = data['token'];
-
       // トークンを保存
       await ServiceUtils.setToken(token);
-
-      return token;
-    } else if (response.statusCode == 401) {
-      throw Exception('ユーザー情報が正しくありません');
     } else {
-      throw Exception('ログインに失敗しました');
+      final message = jsonDecode(response.body)['message'] ?? 'ログインに失敗しました';
+      throw ApiException(message);
     }
   }
 
   // 二要素認証リクエスト
-  Future<String> twoFactorAuth(String passcode) async {
+  Future<void> twoFactorAuth(String passcode) async {
     final token = await ServiceUtils.getToken();
     
     if (token != null) {
@@ -85,24 +82,26 @@ class AuthService {
 
         // トークンを保存
         await ServiceUtils.setToken(token);
-        return token;
-      } else if (response.statusCode == 401) {
-        throw Exception('認証コードが正しくありません');
       } else {
-        throw Exception('認証に失敗しました');
-      }
+        final message = jsonDecode(response.body)['message'] ?? '二要素認証に失敗しました';
+        throw ApiException(message);
+      } 
     } else {
       throw Exception('ログインしていません');
     }
   }
 
   // 二要素認証再送リクエスト
-  Future<bool> resendTwoFactorAuth() async {
+  Future<void> resendTwoFactorAuth() async {
     final token = await ServiceUtils.getToken();
     if (token != null) {
-      await ServiceUtils.postRequest('resend-two-factor-code', token, null);
+      final response = await ServiceUtils.postRequest('resend-two-factor-code', token, null);
+      
+      if (response.statusCode != 200) {
+        final message = jsonDecode(response.body)['message'] ?? '二要素認証コードの再送に失敗しました';
+        throw ApiException(message);
+      }
     }
-    return true;
   }
 
   // ログアウトリクエスト
@@ -110,7 +109,11 @@ class AuthService {
     final token = await ServiceUtils.getToken(); 
     
     if (token != null) {
-      await ServiceUtils.postRequest('logout', token, null);
+      final response = await ServiceUtils.postRequest('logout', token, null);
+      if (response.statusCode != 200) {
+        final message = jsonDecode(response.body)['message'] ?? 'ログアウトに失敗しました';
+        throw ApiException(message);
+      }
       // トークンを削除
       await ServiceUtils.removeToken();
     }
@@ -122,7 +125,11 @@ class AuthService {
       'email': email,
     });
 
-    await ServiceUtils.postRequest('reset-password', null, requestData);
+    final response = await ServiceUtils.postRequest('reset-password', null, requestData);
+    if (response.statusCode != 200) {
+      final message = jsonDecode(response.body)['message'] ?? 'パスワードリセットに失敗しました';
+      throw ApiException(message);
+    }
   }
 
   // 認証状態のチェック

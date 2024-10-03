@@ -3,6 +3,7 @@ import 'package:flutter_sample/src/screens/setting/setting_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_drawer.dart';
+import 'package:flutter_sample/src/widgets/common_navigation_bar.dart';
 
 
 // 認証後のメイン画面
@@ -35,38 +36,19 @@ class _MainScreenState extends State<MainScreen> {
     SettingScreen(),
   ];
 
-  // BottomNavigationBar のアイテムリスト
-  final List<BottomNavigationBarItem> _items = const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Home',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.settings),
-      label: 'Setting',
-    ),
-  ];
+  void _onItemTapped(int index) {
+    setState(() {
+      currentIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: const CommonAppBar(),
       endDrawer: const CommonDrawer(),
-      body:  _screens[currentIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        items: _items,
-        currentIndex: currentIndex,
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: Colors.pink,
-        unselectedItemColor: Colors.grey,
-        showSelectedLabels: true,
-        showUnselectedLabels: true,
-        onTap: (index) {
-          setState(() {
-            currentIndex = index;
-          });
-        },
-      ),
+      body: _screens[currentIndex],
+      bottomNavigationBar: CommonNavigationBar(onTap: _onItemTapped, currentIndex: currentIndex),
     );
   }
 }

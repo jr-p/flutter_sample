@@ -1,5 +1,7 @@
+import 'package:flutter_sample/src/services/api_exception.dart';
 import 'package:flutter_sample/src/services/auth_service.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
+import 'package:flutter_sample/src/utils/snackbar_utils.dart';
 import 'package:flutter_sample/src/utils/validation_utils.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_app_icon.dart';
@@ -42,13 +44,14 @@ class _RegisterInputScreenState extends State<RegisterInputScreen> {
   }
 
   void navigateToRegisterConfirmScreen () async {
+    final isValid = _formKey.currentState!.validate();
+    if (!isValid) return;
+
     DialogUtils.showLoadingDialog(context);
-
-    final response = await authService.checkUser(_emailController.text);
-
-    if (!mounted) return;
-
-    if (response) {
+    try {
+      // ユーザーの存在チェック
+      await authService.checkUser(_emailController.text);
+      if (!mounted) return;
       DialogUtils.hideLoadingDialog(context);
       Navigator.of(context).pushNamed('/register/confirm', arguments: {
         'name': _nameController.text,
@@ -56,16 +59,15 @@ class _RegisterInputScreenState extends State<RegisterInputScreen> {
         'phone_number': _phoneNumberController.text,
         'password': _passwordController.text,
       });
-    } else {
-      // ユーザーが存在する場合
-      DialogUtils.hideLoadingDialog(context);
-      // メールアドレスのバリデーションエラーを表示ション
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('このメールアドレスは既に登録されています'),
-        ),
-      );
 
+    } on ApiException catch (e) {
+      DialogUtils.hideLoadingDialog(context);
+      SnackbarUtils.showSnackbar(context, e.message);
+    
+    } catch (e) {
+      DialogUtils.hideLoadingDialog(context);
+      SnackbarUtils.showSnackbar(context, 'エラーが発生しました');
+    
     }
   }
 
@@ -126,14 +128,7 @@ class _RegisterInputScreenState extends State<RegisterInputScreen> {
                     const SizedBox(height: 50),
                     CommonButton(
                       text: 'Confirm',
-                      onPressed: () {
-                        final isValid = _formKey.currentState!.validate();
-                        if (!isValid) {
-                          return;
-                        } else {
-                          navigateToRegisterConfirmScreen();
-                        }
-                      },
+                      onPressed: navigateToRegisterConfirmScreen,
                     ),
                     const SizedBox(height: 50),
                   ],

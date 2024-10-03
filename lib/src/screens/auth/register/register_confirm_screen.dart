@@ -1,6 +1,7 @@
 import 'package:flutter_sample/src/providers/auth_provider.dart';
 import 'package:flutter_sample/src/utils/dialog_utils.dart';
-import 'package:flutter_sample/src/widgets/auth_wrapper.dart';
+import 'package:flutter_sample/src/utils/route_utils.dart';
+import 'package:flutter_sample/src/utils/snackbar_utils.dart';
 import 'package:flutter_sample/src/widgets/common_app_bar.dart';
 import 'package:flutter_sample/src/widgets/common_app_icon.dart';
 import 'package:flutter_sample/src/widgets/common_button.dart';
@@ -21,27 +22,27 @@ class RegisterComfirmScreen extends StatefulWidget {
 }
 
 class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
-  final _forKey = GlobalKey<FormState>();
-  TextEditingController nameController = TextEditingController();
-  TextEditingController emailController = TextEditingController();
-  TextEditingController phoneNumberController = TextEditingController();
-  TextEditingController passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  TextEditingController _nameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _phoneNumberController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
   
   @override
   void initState() {
     super.initState();
     // 各 Controller に初期値を設定
-    nameController = TextEditingController(text: widget.arguments['name']);
-    emailController = TextEditingController(text: widget.arguments['email']);
-    phoneNumberController = TextEditingController(text: widget.arguments['phone_number']);
-    passwordController = TextEditingController(text: widget.arguments['password']);
+    _nameController = TextEditingController(text: widget.arguments['name']);
+    _emailController = TextEditingController(text: widget.arguments['email']);
+    _phoneNumberController = TextEditingController(text: widget.arguments['phone_number']);
+    _passwordController = TextEditingController(text: widget.arguments['password']);
   }
 
   @override
   void dispose() {
-    nameController.dispose();
-    emailController.dispose();
-    phoneNumberController.dispose();
+    _nameController.dispose();
+    _emailController.dispose();
+    _phoneNumberController.dispose();
     super.dispose();
   }
   
@@ -52,38 +53,25 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
 
   @override
   Widget build(BuildContext context) {
-
+    // 登録処理
     void register() async {
       final authProvider = Provider.of<AuthProvider>(context, listen: false);
-      final name = nameController.text;
-      final email = emailController.text;
-      final phoneNumber = phoneNumberController.text;
-      final password = passwordController.text;
+      final name = _nameController.text;
+      final email = _emailController.text;
+      final phoneNumber = _phoneNumberController.text;
+      final password = _passwordController.text;
 
       // ローディングダイアログを表示
       DialogUtils.showLoadingDialog(context);
-
       // 登録メソッドを呼び出す
       await authProvider.register(name, email, phoneNumber, password);
 
       if (!context.mounted) return;
-
-      // ローディングダイアログを非表示
-      DialogUtils.hideLoadingDialog(context);
-
       // エラーメッセージがある場合は、SnackBar で表示
       if (authProvider.message != null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(authProvider.message!, style: const TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold)),
-          ),
-        );
-      // ログイン成功時は、AuthWrapper に遷移する
+        SnackbarUtils.showSnackbar(context, authProvider.message!);
       } else {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => const AuthWrapper()),
-          (route) => false, // 以前の画面を削除する
-        );
+        RouteUtils.navigateToAuthWrapper(context);
       }
     }
 
@@ -96,16 +84,16 @@ class  _RegisterComfirmScreenState extends State<RegisterComfirmScreen> {
             const CommonAppIcon(size: 100),
             const SizedBox(height: 30),
             Form(
-              key: _forKey,
+              key: _formKey,
               child: Column(
                 children: [
-                  _buildConfirmationRow('Name', nameController.text),
+                  _buildConfirmationRow('Name', _nameController.text),
                   const SizedBox(height: 15),
-                  _buildConfirmationRow('Email', emailController.text),
+                  _buildConfirmationRow('Email', _emailController.text),
                   const SizedBox(height: 15),
-                  _buildConfirmationRow('Phone Number', phoneNumberController.text),
+                  _buildConfirmationRow('Phone Number', _phoneNumberController.text),
                   const SizedBox(height: 15),
-                  _buildConfirmationRow('Password', _maskPassword(passwordController.text)),
+                  _buildConfirmationRow('Password', _maskPassword(_passwordController.text)),
                   const SizedBox(height: 50),
                   CommonButton(
                     text: 'Register',

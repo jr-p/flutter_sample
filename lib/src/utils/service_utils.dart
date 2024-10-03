@@ -17,7 +17,6 @@ class ServiceUtils {
           'Content-Type': 'application/json',
           'Accept': 'application/json',
       };
-
     return header;
   }
 

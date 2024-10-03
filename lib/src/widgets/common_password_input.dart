@@ -49,7 +49,11 @@ class _CommonPasswordInputState extends State<CommonPasswordInput> {
         TextFormField(
           controller: widget.controller,
           obscureText: _isObscure, // パスワード表示/非表示切り替え
+          cursorColor: Colors.pink,
           decoration: InputDecoration(
+            focusedBorder: UnderlineInputBorder(
+              borderSide: const BorderSide(color: Colors.pink, width: 2),
+            ),
             suffixIcon: widget.showToggleIcon ? 
               IconButton(
                 icon: Icon(

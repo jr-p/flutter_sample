@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_sample/src/screens/main_screen.dart';
 
 // 共通のナビゲーションバー
 class CommonNavigationBar extends StatefulWidget {
   const CommonNavigationBar({
     super.key,
-    required this.currentIndex,
+    required this.onTap,
+    this.currentIndex = 0,
   });
 
+  final ValueChanged<int> onTap;
   final int currentIndex;
   @override
   State<CommonNavigationBar> createState() => _CommonNavigationBarState();
@@ -38,10 +39,7 @@ class  _CommonNavigationBarState extends State<CommonNavigationBar> {
       showSelectedLabels: true,
       showUnselectedLabels: true,
       onTap: (index) {
-        Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(builder: (context) => MainScreen(initialIndex: index)),
-          (route) => false,
-        );
+        widget.onTap(index);
       },
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter_sample/src/constants/app_const.dart';
+import 'package:flutter_sample/src/models/user_model.dart';
+import 'package:flutter_sample/src/services/api_exception.dart';
 import 'package:flutter_sample/src/utils/service_utils.dart';
 
 // 設定画面関連のサービス
@@ -7,16 +9,17 @@ class SettingService {
   final baseApiUrl = AppConst.baseApiUrl;
 
   // ユーザー情報取得リクエスト
-  Future<Map<String, dynamic>> getUser() async {
+  Future<User> getUser() async {
     final token = await ServiceUtils.getToken();
 
     final response = await ServiceUtils.getRequest('user', token, null);
 
     if (response.statusCode == 200) {
       final data = jsonDecode(response.body);
-      return Map<String, dynamic>.from(data['data']);
+      return User.fromJson(data['data']);
     } else {
-      throw Exception('ユーザー情報の取得に失敗しました');
+      final message = jsonDecode(response.body)['message'];
+      throw ApiException(message ?? 'ユーザー情報の取得に失敗しました');
     }
   }
 
@@ -32,12 +35,13 @@ class SettingService {
     final response = await ServiceUtils.putRequest('user', token, requestData);
 
     if (response.statusCode != 200) {
-      throw Exception('アカウント情報の更新に失敗しました');
+      final message = jsonDecode(response.body)['message'];
+      throw ApiException(message ?? 'アカウント情報の更新に失敗しました');
     }
   }
 
   // ユーザー電話番号更新リクエスト
-  Future<bool> updatePhoneNumber(String phoneNumber) async {
+  Future<void> updatePhoneNumber(String phoneNumber) async {
     final token = await ServiceUtils.getToken();
 
     final requestData = jsonEncode({
@@ -47,22 +51,20 @@ class SettingService {
     final response = await ServiceUtils.putRequest('user/phone', token, requestData);
 
     if (response.statusCode != 200) {
-      throw Exception('電話番号の更新に失敗しました');
-    } else {
-      return true;
+      final message = jsonDecode(response.body)['message'];
+      throw ApiException(message ?? '電話番号の更新に失敗しました');
     }
   }
 
   // ユーザー退会リクエスト
-  Future<bool> withdraw() async {
+  Future<void> withdraw() async {
     final token = await ServiceUtils.getToken();
 
     final response = await ServiceUtils.putRequest('user/withdraw', token, null);
 
     if (response.statusCode != 200) {
-      throw Exception('退会処理に失敗しました');
-    } else {
-      return true;
+      final message = jsonDecode(response.body)['message'];
+      throw ApiException(message ?? '退会に失敗しました');
     }
   }
 }
