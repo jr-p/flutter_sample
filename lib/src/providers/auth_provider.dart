@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 class AuthProvider with ChangeNotifier {
   final AuthService _authService = AuthService(); // AuthServiceのインスタンスを作成
   bool _isAuthenticated = false;
-  bool _isTwoAuthenticated = true;
+  bool _isTwoAuthenticated = false;
   String? _message;
 
   bool get isAuthenticated => _isAuthenticated;
@@ -98,6 +98,9 @@ class AuthProvider with ChangeNotifier {
   // トークンのチェック
   Future<void> checkAuthentication() async {
     _isAuthenticated = await _authService.isAuthenticated();
+    if (isAuthenticated) {
+      _isTwoAuthenticated = await _authService.isTwoAuthenticated();
+    }
     notifyListeners();
   }
 

@@ -137,4 +137,17 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.containsKey('auth_token');
   }
+
+  // 二要素認証済みかのチェック
+  Future<bool> isTwoAuthenticated() async {
+    final token = await ServiceUtils.getToken();
+    if (token != null) {
+      final response = await ServiceUtils.getRequest('check-two-factor-auth', token, null);
+      if (response.statusCode == 200) {
+        final isTwoAuthenticated = jsonDecode(response.body)['is_two_authenticated'];
+        return isTwoAuthenticated;
+      }
+    }
+    return false;
+  }
 }
